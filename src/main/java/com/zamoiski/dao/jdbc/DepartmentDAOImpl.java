@@ -2,6 +2,7 @@ package com.zamoiski.dao.jdbc;
 
 import com.zamoiski.dao.DepartmentDAO;
 import com.zamoiski.entity.Department;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,20 +16,21 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@PropertySource("department-sql.properties")
+@PropertySource("classpath:department-sql.properties")
 public class DepartmentDAOImpl implements DepartmentDAO {
 
-    @Value("${Insert}")
+    @Value("${insertDepartment}")
     private  String insert;
-    @Value("${selectAll}")
+    @Value("${selectAllDepartments}")
     private String selectAll;
-    @Value("${findById}")
+    @Value("${findByIdDepartment}")
     private String findById;
-    @Value("${deleteById}")
+    @Value("${deleteByIdDepartment}")
     private String deleteById;
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Autowired
     public DepartmentDAOImpl(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }

@@ -17,20 +17,20 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@PropertySource("employee-sql.properties")
+@PropertySource("classpath:employee-sql.properties")
 public class EmployeeDAOImpl implements EmployeeDAO {
 
-    @Value("${Insert}")
+    @Value("${insertEmployee}")
     private String insert;
-    @Value("${update}")
+    @Value("${updateEmployee}")
     private String update;
-    @Value("${selectAll}")
+    @Value("${selectAllEmployees}")
     private String selectAll;
-    @Value("${findById}")
+    @Value("${findByIdEmployee}")
     private String findById;
-    @Value("${deleteById}")
+    @Value("${deleteByIdEmployee}")
     private String deleteById;
-    @Value("${findIdByName}")
+    @Value("${findIdByNameEmployee}")
     private String findIdByName;
     @Value("${updateTitleById}")
     private String updateTitleById;
