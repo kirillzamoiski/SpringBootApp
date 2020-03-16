@@ -7,9 +7,11 @@ import java.util.List;
 public interface DepartmentDAO {
     List<Department> findAll();
 
-    Department findById(Long theId);
+    Department findById(Long id);
 
     void save(Department department);
 
-    void deleteById(Long theId);
+    void update(Department department);
+
+    void deleteById(Long id);
 }

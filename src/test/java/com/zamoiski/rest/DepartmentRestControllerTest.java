@@ -19,14 +19,11 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentRestControllerTest {
@@ -47,8 +44,8 @@ class DepartmentRestControllerTest {
     @Test
     void findAll() throws Exception {
         List<Department> departments = new ArrayList<>();
-        departments.add(new Department(1L,"MMO", LocalDateTime.now()));
-        departments.add(new Department(2L,"RPG", LocalDateTime.now()));
+        departments.add(new Department(1L, "MMO", LocalDateTime.now()));
+        departments.add(new Department(2L, "RPG", LocalDateTime.now()));
 
         when(service.findAll()).thenReturn(departments);
 
@@ -56,28 +53,28 @@ class DepartmentRestControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$",hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(2)));
 
         verify(service, times(1)).findAll();
     }
 
     @Test
     void findById() throws Exception {
-        Department department = new Department(1L,"MMO",LocalDateTime.now());
+        Department department = new Department(1L, "MMO", LocalDateTime.now());
 
         when(service.findById(anyLong())).thenReturn(department);
 
         mockMvc.perform(get("/api/departments/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$.id",is(1)));
+                .andExpect(jsonPath("$.id", is(1)));
 
         verify(service, times(1)).findById(1L);
     }
 
     @Test
     void addEmployee() throws Exception {
-        String departmnet = new ObjectMapper().writeValueAsString(new Department(1L,"MMO",null));
+        String departmnet = new ObjectMapper().writeValueAsString(new Department(1L, "MMO", null));
 
         service.save(any(Department.class));
 
@@ -93,18 +90,18 @@ class DepartmentRestControllerTest {
 
     @Test
     void updateEmployee() throws Exception {
-        String employee = new ObjectMapper().writeValueAsString(new Department(1L,"MMO",null));
+        String employee = new ObjectMapper().writeValueAsString(new Department(1L, "MMO", null));
 
-        service.save(any(Department.class));
+        service.update(any(Department.class));
 
         mockMvc.perform(
                 put("/api/departments")
                         .accept(MediaType.APPLICATION_JSON)
                         .content(employee)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
-        verify(service).save(any(Department.class));
+        verify(service).update(any(Department.class));
     }
 
     @Test

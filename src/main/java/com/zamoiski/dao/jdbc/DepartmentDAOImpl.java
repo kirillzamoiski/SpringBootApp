@@ -2,25 +2,25 @@ package com.zamoiski.dao.jdbc;
 
 import com.zamoiski.dao.DepartmentDAO;
 import com.zamoiski.entity.Department;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @PropertySource("classpath:department-sql.properties")
 public class DepartmentDAOImpl implements DepartmentDAO {
 
     @Value("${insertDepartment}")
-    private  String insert;
+    private String insert;
+    @Value("${updateDepartment}")
+    private String update;
     @Value("${selectAllDepartments}")
     private String selectAll;
     @Value("${findByIdDepartment}")
@@ -30,33 +30,46 @@ public class DepartmentDAOImpl implements DepartmentDAO {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Autowired
+    private RowMapper<Department> departmentRowMapper = ((resultSet, i) ->
+            new Department(resultSet.getLong("id"),
+            resultSet.getString("department_name"),
+            resultSet.getTimestamp("date_of_create").toLocalDateTime()));
+
     public DepartmentDAOImpl(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Override
     public List<Department> findAll() {
-        return namedParameterJdbcTemplate.query(selectAll, new DepartmentMapper());
+        return namedParameterJdbcTemplate.query(selectAll, departmentRowMapper);
     }
 
     @Override
-    public Department findById(Long theId) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("id",Long.valueOf(theId));
-        return namedParameterJdbcTemplate.queryForObject(findById, namedParameters, new DepartmentMapper());
+    public Department findById(Long id) {
+        SqlParameterSource namedParameter = new MapSqlParameterSource("id", id);
+        return namedParameterJdbcTemplate.queryForObject(findById, namedParameter, departmentRowMapper);
     }
 
     @Override
     public void save(Department department) {
-        Map namedParameters = new HashMap();
-        namedParameters.put("department_name",department.getDepartment_name());
-        namedParameters.put("date_of_create",department.getDateOfCreate());
-        namedParameterJdbcTemplate.update(insert,namedParameters);
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("department_name", department.getDepartmentName());
+        namedParameters.addValue("date_of_create", department.getDateOfCreate());
+        namedParameterJdbcTemplate.update(insert, namedParameters);
     }
 
     @Override
-    public void deleteById(Long theId) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("id",Long.valueOf(theId));
+    public void update(Department department) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("id", department.getId());
+        namedParameters.addValue("department_name", department.getDepartmentName());
+        namedParameters.addValue("date_of_create", department.getDateOfCreate());
+        namedParameterJdbcTemplate.update(update, namedParameters);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        SqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
         namedParameterJdbcTemplate.update(deleteById, namedParameters);
     }
 }

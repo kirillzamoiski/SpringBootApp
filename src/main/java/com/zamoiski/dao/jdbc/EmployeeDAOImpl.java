@@ -3,18 +3,17 @@ package com.zamoiski.dao.jdbc;
 import com.zamoiski.dao.EmployeeDAO;
 import com.zamoiski.entity.Department;
 import com.zamoiski.entity.Employee;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.zamoiski.entity.JobTitle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @PropertySource("classpath:employee-sql.properties")
@@ -32,59 +31,71 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     private String deleteById;
     @Value("${findIdByNameEmployee}")
     private String findIdByName;
-    @Value("${updateTitleById}")
+    @Value("${updateTitleByDepartmentId}")
     private String updateTitleById;
 
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Autowired
+    private RowMapper<Employee> rowMapperEmployee = ((resultSet, i) ->
+            new Employee(resultSet.getLong("employee_id"), resultSet.getString("first_name"),
+            resultSet.getString("last_name"), JobTitle.valueOf(resultSet.getString("job_name")),
+            resultSet.getString("gender"), resultSet.getTimestamp("date_of_birth").toLocalDateTime(),
+            new Department(resultSet.getLong("department_id"), resultSet.getString("department_name"), resultSet.getTimestamp("date_of_create").toLocalDateTime())
+            ));
+
     public EmployeeDAOImpl(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Override
     public List<Employee> findAll() {
-        return namedParameterJdbcTemplate.query(selectAll, new EmployeeMapper());
+        return namedParameterJdbcTemplate.query(selectAll, rowMapperEmployee);
     }
 
     @Override
     public Employee findById(Long id) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("id",id);
-        return namedParameterJdbcTemplate.queryForObject(findById, namedParameters, new EmployeeMapper());
+        SqlParameterSource namedParameter = new MapSqlParameterSource("id", id);
+        return namedParameterJdbcTemplate.queryForObject(findById, namedParameter, rowMapperEmployee);
     }
 
     @Override
     public void save(Employee employee) {
-        Map namedParameters = new HashMap();
-        namedParameters.put("first_name",employee.getFirstName());
-        namedParameters.put("last_name",employee.getLastName());
-        namedParameters.put("job_name",employee.getJobTitle().name());
-        namedParameters.put("gender",employee.getGender());
-        namedParameters.put("date_of_birth",employee.getDateOfBirth());
-        namedParameters.put("department_id",employee.getDepartment().getId());
-        if(employee.getId()==null){
-            namedParameterJdbcTemplate.update(insert,namedParameters);
-        }
-        else {
-            namedParameters.put("employee_id",employee.getId());
-            namedParameterJdbcTemplate.update(update,namedParameters);
-        }
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        setNamedParameters(employee, namedParameters);
+        namedParameterJdbcTemplate.update(insert, namedParameters);
+    }
+
+    @Override
+    public void update(Employee employee) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("employee_id", employee.getId());
+        setNamedParameters(employee, namedParameters);
+        namedParameterJdbcTemplate.update(update, namedParameters);
     }
 
     @Override
     public void deleteById(Long id) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("id",id);
-        namedParameterJdbcTemplate.update(deleteById, namedParameters);
+        SqlParameterSource namedParameter = new MapSqlParameterSource("id", id);
+        namedParameterJdbcTemplate.update(deleteById, namedParameter);
     }
 
     @Override
     public void updateTitle(String title, String departmentName) {
-        SqlParameterSource namedParameters = new MapSqlParameterSource("departmentName",departmentName);
-        Department department = namedParameterJdbcTemplate.queryForObject(findIdByName,namedParameters,new DepartmentMapper());
-        Map namedParameters1 = new HashMap();
-        namedParameters1.put("title",title);
-        namedParameters1.put("id",department.getId());
-        namedParameterJdbcTemplate.update(updateTitleById,namedParameters1);
+        SqlParameterSource namedParameters = new MapSqlParameterSource("departmentName", departmentName);
+        Department departmentByName = namedParameterJdbcTemplate.queryForObject(findIdByName, namedParameters, ((resultSet, i) -> new Department(resultSet.getLong("id"), resultSet.getString("department_name"), resultSet.getTimestamp("date_of_create").toLocalDateTime())));
+        MapSqlParameterSource namedParameter = new MapSqlParameterSource();
+        namedParameter.addValue("title", title);
+        namedParameter.addValue("id", departmentByName.getId());
+        namedParameterJdbcTemplate.update(updateTitleById, namedParameter);
+    }
+
+    private void setNamedParameters(Employee employee, MapSqlParameterSource namedParameters) {
+        namedParameters.addValue("first_name", employee.getFirstName());
+        namedParameters.addValue("last_name", employee.getLastName());
+        namedParameters.addValue("job_name", employee.getJobTitle().name());
+        namedParameters.addValue("gender", employee.getGender());
+        namedParameters.addValue("date_of_birth", employee.getDateOfBirth());
+        namedParameters.addValue("department_id", employee.getDepartment().getId());
     }
 }

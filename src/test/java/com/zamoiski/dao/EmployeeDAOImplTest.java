@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
-@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,scripts = "classpath:insert-value.sql")
+@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:insert-value.sql")
 class EmployeeDAOImplTest {
 
     @Autowired
@@ -28,32 +28,29 @@ class EmployeeDAOImplTest {
     @Test
     void findAll() {
         List<Employee> employees = employeeDAO.findAll();
-        assertEquals(2,employees.size());
+        assertEquals(2, employees.size());
     }
 
     @Test
     void findById() {
-        List<Employee> employees = employeeDAO.findAll();
-        Employee employee = employeeDAO.findById(employees.get(1).getId());
-        assertEquals("Alice",employee.getFirstName());
-        assertEquals("Ivanova",employee.getLastName());
+        Employee employee = employeeDAO.findById(1L);
+        assertEquals("Alex", employee.getFirstName());
+        assertEquals("Ivanov", employee.getLastName());
     }
 
     @Test
     void save() {
-        Department department = new Department(2L,"DTP", LocalDateTime.now());
+        Department department = new Department( 3L,"AXX", LocalDateTime.now());
         departmentDAO.save(department);
-        Employee employee = new Employee("Petya","Horris", JobTitle.TEAM_LEAD, "MALE",LocalDateTime.now(),department);
+        Employee employee = new Employee("Petya", "Horris", JobTitle.TEAM_LEAD, "MALE", LocalDateTime.now(), department);
         employeeDAO.save(employee);
         List<Employee> employees = employeeDAO.findAll();
-        assertEquals(3,employees.size());
+        assertEquals(3, employees.size());
     }
 
     @Test
     void deleteById() {
-        List<Employee> employees = employeeDAO.findAll();
-        employeeDAO.deleteById(employees.get(1).getId());
-        employees = employeeDAO.findAll();
-        assertEquals(1,employees.size());
+        employeeDAO.deleteById(1L);
+        assertEquals(1, employeeDAO.findAll().size());
     }
 }

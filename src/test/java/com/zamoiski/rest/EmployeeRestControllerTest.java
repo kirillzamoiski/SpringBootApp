@@ -46,11 +46,11 @@ class EmployeeRestControllerTest {
     void findAll() throws Exception {
         List<Employee> employees = new ArrayList<>();
 
-        employees.add(new Employee(1L,"Alice","Petrova", JobTitle.HR,
-                "FEMALE", LocalDateTime.now(),null));
+        employees.add(new Employee(1L, "Alice", "Petrova", JobTitle.HR,
+                "FEMALE", LocalDateTime.now(), null));
 
-        employees.add(new Employee(3L,"Bob","Ivanov", JobTitle.TEAM_LEAD,
-                "MALE", LocalDateTime.now(),null));
+        employees.add(new Employee(3L, "Bob", "Ivanov", JobTitle.TEAM_LEAD,
+                "MALE", LocalDateTime.now(), null));
 
         when(service.findAll()).thenReturn(employees);
 
@@ -58,16 +58,16 @@ class EmployeeRestControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[1].id",is(3)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[1].id", is(3)));
 
         verify(service, times(1)).findAll();
     }
 
     @Test
     void findById() throws Exception {
-        Employee employee = new Employee(1L,"Alice","Petrova", JobTitle.HR,
-                "FEMALE", LocalDateTime.now(),null);
+        Employee employee = new Employee(1L, "Alice", "Petrova", JobTitle.HR,
+                "FEMALE", LocalDateTime.now(), null);
 
 
         when(service.findById(anyLong())).thenReturn(employee);
@@ -75,7 +75,7 @@ class EmployeeRestControllerTest {
         mockMvc.perform(get("/api/employees/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$.id",is(1)));
+                .andExpect(jsonPath("$.id", is(1)));
 
         verify(service, times(1)).findById(1L);
     }
@@ -83,8 +83,8 @@ class EmployeeRestControllerTest {
 
     @Test
     void addEmployee() throws Exception {
-        String employee = new ObjectMapper().writeValueAsString(new Employee(1L,"Alice","Petrova", JobTitle.HR,
-                "FEMALE", null,null));
+        String employee = new ObjectMapper().writeValueAsString(new Employee(1L, "Alice", "Petrova", JobTitle.HR,
+                "FEMALE", null, null));
 
         service.save(any(Employee.class));
 
@@ -100,19 +100,19 @@ class EmployeeRestControllerTest {
 
     @Test
     void updateEmployee() throws Exception {
-        String employee = new ObjectMapper().writeValueAsString(new Employee(1L,"Alice","Petrova", JobTitle.HR,
-                "FEMALE", null,null));
+        String employee = new ObjectMapper().writeValueAsString(new Employee(1L, "Alice", "Petrova", JobTitle.HR,
+                "FEMALE", null, null));
 
-        service.save(any(Employee.class));
+        service.update(any(Employee.class));
 
         mockMvc.perform(
                 put("/api/employees")
                         .accept(MediaType.APPLICATION_JSON)
                         .content(employee)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
-        verify(service).save(any(Employee.class));
+        verify(service).update(any(Employee.class));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.zamoiski.rest;
 
 import com.zamoiski.entity.Employee;
 import com.zamoiski.service.EmployeeService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,45 +10,40 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@AllArgsConstructor
 public class EmployeeRestController {
     private EmployeeService employeeService;
 
-    public EmployeeRestController(EmployeeService employeeService){
-        this.employeeService=employeeService;
-    }
-
     @GetMapping("/employees")
-    public List<Employee> findAll(){
+    public List<Employee> findAll() {
         return employeeService.findAll();
     }
 
     @GetMapping("/employees/{employeeId}")
-    public Employee findById(@PathVariable Long employeeId){
+    public Employee findById(@PathVariable Long employeeId) {
         return employeeService.findById(employeeId);
     }
 
     @PostMapping("/employees")
-    public Employee addEmployee(@RequestBody Employee employee){
+    public Employee addEmployee(@RequestBody Employee employee) {
         employeeService.save(employee);
-
         return employee;
     }
 
     @PutMapping("/employees")
-    public Employee updateEmployee(@RequestBody Employee employee){
-        employeeService.save(employee);
+    public ResponseEntity<Object> updateEmployee(@RequestBody Employee employee) {
+        employeeService.update(employee);
+        return ResponseEntity.noContent().build();
+    }
 
-        return employee;
+    @PutMapping("/employees/{departmentName}")
+    public void updateTitleEmployee(@PathVariable String departmentName, @RequestParam String jobTitle) {
+        employeeService.updateTitle(jobTitle, departmentName);
     }
 
     @DeleteMapping("/employees/{employeeId}")
-    public ResponseEntity<Object> deleteEmployee(@PathVariable Long employeeId){
+    public ResponseEntity<Object> deleteEmployee(@PathVariable Long employeeId) {
         employeeService.deleteById(employeeId);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/employees/{jobTitle}/{departmentName}")
-    public void updateTitleEmployee(@PathVariable String jobTitle, @PathVariable String departmentName){
-        employeeService.updateTitle(jobTitle,departmentName);
     }
 }
