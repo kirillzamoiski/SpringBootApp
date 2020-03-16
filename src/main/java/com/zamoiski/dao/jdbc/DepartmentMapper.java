@@ -1,4 +1,4 @@
-package com.zamoiski.dao;
+package com.zamoiski.dao.jdbc;
 
 import com.zamoiski.entity.Department;
 import org.springframework.jdbc.core.RowMapper;

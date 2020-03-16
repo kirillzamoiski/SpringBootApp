@@ -1,5 +1,6 @@
-package com.zamoiski.dao;
+package com.zamoiski.dao.jdbc;
 
+import com.zamoiski.dao.EmployeeDAO;
 import com.zamoiski.entity.Department;
 import com.zamoiski.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @Repository
 @PropertySource("employee-sql.properties")
-public class EmployeeDAOImpl implements EmployeeDAO{
+public class EmployeeDAOImpl implements EmployeeDAO {
 
     @Value("${Insert}")
     private String insert;
